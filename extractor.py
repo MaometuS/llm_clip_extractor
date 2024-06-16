@@ -1,12 +1,12 @@
 yfcc100m = '/home/maometus/Documents/datasets/yfcc100m/YFCC100M-Downloader/data/images/'
-mvtec_grid = '/home/maometus/Documents/datasets/mvtec_anomaly_detection/grid/train/good/'
+output_folder = '/beegfs/po1/rakhimov/yfcc100m_extracted/'
 
 import clip
+import zipfile
 import numpy as np
 import torch
 import os
 from PIL import Image
-import matplotlib.pyplot as plt
 
 keywords = [
     "mesh",
@@ -107,27 +107,44 @@ model.cuda().eval()
 
 result = []
 
-def traverse_files():
-    for (root, dirs, files) in os.walk(yfcc100m, topdown=True):
-        for file in files:
-            if file.endswith(".jpg") or file.endswith(".jpeg") or file.endswith(".png"):
-                image = Image.open(os.path.join(root, file)).convert("RGB")
-                image_input = torch.tensor(np.stack([preprocess(image)])).cuda()
-                desc_tokens = clip.tokenize(descriptions).cuda()
-                with torch.no_grad():
-                    image_features = model.encode_image(image_input).float()
-                    text_features = model.encode_text(desc_tokens).float()
-                    image_features /= image_features.norm(dim=-1, keepdim=True)
-                    text_features /= text_features.norm(dim=-1, keepdim=True)
-                    similarity = text_features @ image_features.T
+def traverse_zips():
+    checkpointFile = open(os.path.join("checkpoint.txt"), "r")
+    checkpointStr = checkpointFile.readline()
+    checkpointFile.close()
 
-                    if similarity.max() > 0.28:
-                        result.append(os.path.join(root, file))
-                    
-                    if len(result) >= 100:
-                        return
+    checkpoint = int(checkpointStr, 16)
+    endpoint = int('fff', 16)+1
+    for i in range(checkpoint, endpoint):
+        currPoint = hex(i)[3:]
+        f = open("checkpoint.txt", "w")
+        f.write(currPoint)
+        f.close()
+        process_zip(currPoint)
 
-traverse_files()
+def process_zip(zipname):
+    currZip = zipfile.ZipFile(os.path.join(yfcc100m, zipname+".zip"))
+    fileList = currZip.namelist()
 
-print(result)
+    for fileName in fileList:
+        if fileName.endswith(".jpg") or fileName.endswith(".jpeg") or fileName.endswith(".png"):
+            file = currZip.open(fileName)
+            isFitting = clipTest(file)
+            file.close()
 
+            if isFitting:
+                currZip.extract(fileName, os.path.join(output_folder, zipname, fileName))
+    
+def clipTest(file):
+    image = Image.open(file).convert("RGB")
+    image_input = torch.tensor(np.stack([preprocess(image)])).cuda()
+    desc_tokens = clip.tokenize(descriptions).cuda()
+    with torch.no_grad():
+        image_features = model.encode_image(image_input).float()
+        text_features = model.encode_text(desc_tokens).float()
+        image_features /= image_features.norm(dim=-1, keepdim=True)
+        text_features /= text_features.norm(dim=-1, keepdim=True)
+        similarity = text_features @ image_features.T
+
+        return similarity > 0.28
+
+traverse_zips()
