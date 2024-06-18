@@ -124,7 +124,7 @@ def traverse_zips():
     endpoint = int('fff', 16)+1
     for i in range(checkpoint, endpoint):
         currPoint = hex(i)[3:]
-        f = open("checkpoint.txt", "w")
+        f = open(os.path.join(output_folder, "checkpoint.txt"), "w")
         f.write(currPoint)
         f.close()
         process_zip(currPoint)
