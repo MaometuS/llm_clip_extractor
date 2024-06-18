@@ -1,5 +1,6 @@
-yfcc100m = '/home/maometus/Documents/datasets/yfcc100m/YFCC100M-Downloader/data/images/'
-output_folder = '/beegfs/po1/rakhimov/yfcc100m_extracted/'
+yfcc100m = '/beegfs/rakhimov/yfcc100m/zips/'
+output_folder = '/beegfs/rakhimov/yfcc100m_extracted/'
+
 
 import clip
 import zipfile
@@ -108,9 +109,16 @@ model.cuda().eval()
 result = []
 
 def traverse_zips():
-    checkpointFile = open(os.path.join("checkpoint.txt"), "r")
-    checkpointStr = checkpointFile.readline()
-    checkpointFile.close()
+    checkpointStr = '000'
+
+    try:
+        checkpointFile = open(os.path.join(output_folder, "checkpoint.txt"), "r")
+        checkpointStr = checkpointFile.readline()
+        checkpointFile.close()
+    except:
+        checkpointFile = open(os.path.join(output_folder, "checkpoint.txt"), "w")
+        checkpointStr = checkpointFile.write('000')
+        checkpointFile.close()
 
     checkpoint = int(checkpointStr, 16)
     endpoint = int('fff', 16)+1
@@ -122,6 +130,12 @@ def traverse_zips():
         process_zip(currPoint)
 
 def process_zip(zipname):
+    if len(zipname) == 1:
+        zipname+="00"
+    
+    if len(zipname) == 2:
+        zipname+="0"
+
     currZip = zipfile.ZipFile(os.path.join(yfcc100m, zipname+".zip"))
     fileList = currZip.namelist()
 
