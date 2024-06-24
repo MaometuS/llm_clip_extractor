@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=DION_IAD
+#SBATCH --job-name=CLIP_EXT
 ###########RESOURCES###########
 #SBATCH --partition=48-4
 #SBATCH --gres=gpu:4
