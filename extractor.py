@@ -164,6 +164,6 @@ def clipTest(file):
         text_features /= text_features.norm(dim=-1, keepdim=True)
         similarity = text_features @ image_features.T
 
-        return similarity > 0.28
+        return similarity.max() > 0.28
 
 traverse_zips()
