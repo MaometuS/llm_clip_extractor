@@ -117,8 +117,9 @@ def traverse_zips():
         checkpointFile.close()
     except:
         checkpointFile = open(os.path.join(output_folder, "checkpoint.txt"), "w")
-        checkpointStr = checkpointFile.write('000')
+        checkpointFile.write('000')
         checkpointFile.close()
+        checkpointStr = '000'
 
     checkpoint = int(checkpointStr, 16)
     endpoint = int('fff', 16)+1
