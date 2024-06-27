@@ -1,4 +1,4 @@
-yfcc100m = '/beegfs/rakhimov/yfcc100m/zips/'
+yfcc100m = '/beegfs/rakhimov/yfcc100m/zip/'
 output_folder = '/beegfs/rakhimov/yfcc100m_extracted/'
 
 
