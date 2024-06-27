@@ -124,7 +124,7 @@ def traverse_zips():
     checkpoint = int(checkpointStr, 16)
     endpoint = int('fff', 16)+1
     for i in range(checkpoint, endpoint):
-        currPoint = hex(i)[3:]
+        currPoint = hex(i)[2:]
         f = open(os.path.join(output_folder, "checkpoint.txt"), "w")
         f.write(currPoint)
         f.close()
@@ -132,10 +132,10 @@ def traverse_zips():
 
 def process_zip(zipname):
     if len(zipname) == 1:
-        zipname+="00"
+        zipname="00" + zipname
     
     if len(zipname) == 2:
-        zipname+="0"
+        zipname="0" + zipname
 
     currZip = zipfile.ZipFile(os.path.join(yfcc100m, zipname+".zip"))
     fileList = currZip.namelist()
