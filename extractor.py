@@ -1,5 +1,5 @@
 yfcc100m = '/beegfs/rakhimov/yfcc100m/zip/'
-output_folder = '/beegfs/rakhimov/yfcc100m_extracted_bottle/'
+output_folder = '/beegfs/rakhimov/yfcc100m_extracted_clip/'
 
 
 import clip
@@ -7,8 +7,27 @@ import zipfile
 import numpy as np
 import torch
 import os
-from keywords.bottle import descriptions
+from keywords import bottle, cable, capsule, carpet, grid, hazelnut, leather, metal_nut, pill, screw, tile, toothbrush, transistor, wood, zipper
 from PIL import Image
+
+
+description_array = [
+    ('bottle', bottle.descriptions),
+    ('cable', cable.descriptions),
+    ('capsule', capsule.descriptions),
+    ('carpet', carpet.descriptions),
+    ('grid', grid.descriptions),
+    ('hazelnut', hazelnut.descriptions),
+    ('leather', leather.descriptions),
+    ('metal_nut', metal_nut.descriptions),
+    ('pill', pill.descriptions),
+    ('screw', screw.descriptions),
+    ('tile', tile.descriptions),
+    ('toothbrush', toothbrush.descriptions),
+    ('transistor', transistor.descriptions),
+    ('wood', wood.descriptions),
+    ('zipper', zipper.descriptions),
+]
 
 model, preprocess = clip.load('ViT-B/32')
 model.cuda().eval()
@@ -53,14 +72,15 @@ def process_zip(zipname):
 
     for fileName in fileList:
         if fileName.endswith(".jpg") or fileName.endswith(".jpeg") or fileName.endswith(".png"):
-            file = currZip.open(fileName)
-            isFitting = clipTest(file)
-            file.close()
+            for pair in description_array:
+                file = currZip.open(fileName)
+                isFitting = clipTest(file, pair[1])
+                file.close()
 
-            if isFitting:
-                currZip.extract(fileName, os.path.join(output_folder, fileName))
+                if isFitting:
+                    currZip.extract(fileName, os.path.join(output_folder, pair[0], zipname, os.path.basename(fileName)))
     
-def clipTest(file):
+def clipTest(file, descriptions):
     image = Image.open(file).convert("RGB")
     image_input = torch.tensor(np.stack([preprocess(image)])).cuda()
     desc_tokens = clip.tokenize(descriptions).cuda()
