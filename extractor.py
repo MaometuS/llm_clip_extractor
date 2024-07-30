@@ -1,5 +1,5 @@
 yfcc100m = '/beegfs/rakhimov/yfcc100m/zip/'
-output_folder = '/beegfs/rakhimov/yfcc100m_extracted_clip/'
+output_folder = '/beegfs/rakhimov/yfcc100m_extracted/'
 
 
 import clip
