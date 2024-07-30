@@ -93,4 +93,4 @@ def clipTest(file, descriptions):
 
         return similarity.max() > 0.28
 
-traverse_zips()
+process_zip('000')
